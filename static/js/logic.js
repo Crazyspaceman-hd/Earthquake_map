@@ -11,14 +11,13 @@ d3.json(queryUrl).then(data => {
 });
 
 function getColor(d) {
-    return d > 1000 ? '#800026' :
-           d > 90  ? '#BD0026' :
-           d > 70  ? '#E31A1C' :
-           d > 50  ? '#FC4E2A' :
-           d > 30   ? '#FD8D3C' :
-           d > 10   ? '#FEB24C' :
-           d > -9   ? '#FED976' :
-                      '#FFEDA0';
+    return d > 90  ? '#d73027' :
+           d > 70  ? '#fc8d59' :
+           d > 50  ? '#fee08b' :
+           d > 30   ? '#d9ef8b' :
+           d > 10   ? '#91cf60' :
+           d > -15   ? '#1a9850' :
+                      '#252525';
 }
 
 function createFeatures(earthquakeData) {
@@ -27,7 +26,8 @@ function createFeatures(earthquakeData) {
   // Give each feature a popup describing the place and time of the earthquake
   function onEachFeature(feature, layer) {
     layer.bindPopup("<h3>" + feature.properties.title +
-      "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+      "</h3><hr><p>" + new Date(feature.properties.time) + "</p>" +
+      feature.geometry.coordinates[2]);
   }
 
   // Create a GeoJSON layer containing the features array on the earthquakeData object
@@ -40,9 +40,11 @@ function createFeatures(earthquakeData) {
     onEachFeature: onEachFeature,
     pointToLayer: (feature, latlng) => {
       return new L.Circle(latlng, {
-        radius: feature.properties.mag*25000,
+        weight: 1,
+        radius: feature.properties.mag*100000,
         fillColor: getColor(feature.geometry.coordinates[2]),
-        stroke: false 
+        fillOpacity: 1,
+        color: '#000000'
       });
     }
   });
@@ -54,12 +56,12 @@ function createFeatures(earthquakeData) {
 function createMap(earthquakes, mags) {
 
   // Define streetmap and darkmap layers
-  const streetmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+  const outdoors = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
     tileSize: 512,
     maxZoom: 18,
     zoomOffset: -1,
-    id: "mapbox/streets-v11",
+    id: "mapbox/outdoors-v11",
     accessToken: API_KEY
   });
 
@@ -70,9 +72,17 @@ function createMap(earthquakes, mags) {
     accessToken: API_KEY
   });
 
+  const satellite = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+    maxZoom: 16,
+    id: "mapbox/satellite-v9",
+    accessToken: API_KEY
+});
+
   // Define a baseMaps object to hold our base layers
   const baseMaps = {
-    "Street Map": streetmap,
+    "Satellite": satellite,
+    "Outdoors": outdoors,
     "Dark Map": darkmap
   };
 
@@ -85,10 +95,10 @@ function createMap(earthquakes, mags) {
   // Create our map, giving it the streetmap and earthquakes layers to display on load
   const myMap = L.map("map", {
     center: [
-      37.09, -95.71
+      0, 0
     ],
-    zoom: 5,
-    layers: [streetmap, earthquakes]
+    zoom: 3,
+    layers: [satellite, mags]
   });
 
   // Create a layer control
