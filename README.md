@@ -1,4 +1,4 @@
-# Leaflet-Challenge
+# Earthquake Map using Leaflet
 The code for this page produces a scrollable and zoomable map of earthquakes that have occured in the past week. 
 
 It requires an API key from Mapbox saved in a `config.js` file stored in the `static/js` folder.
